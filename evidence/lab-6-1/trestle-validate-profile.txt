@@ -1,0 +1,1 @@
+﻿VALID: Model C:\Users\user\terraform\oscal\profiles\cge-p-minimum\profile.json passed the Validator to confirm the model passes all registered validation tests.
