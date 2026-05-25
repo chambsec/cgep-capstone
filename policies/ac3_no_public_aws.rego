@@ -33,11 +33,21 @@ has_complete_pab(bucket_addr) if {
 	planned.restrict_public_buckets == true
 }
 
+# Match by reference
 pab_for(bucket_addr) := pab if {
 	some r in input.configuration.root_module.resources
 	r.type == "aws_s3_bucket_public_access_block"
 	some ref in r.expressions.bucket.references
 	pab_references_bucket(ref, bucket_addr)
+	pab := {"address": sprintf("aws_s3_bucket_public_access_block.%s", [r.name])}
+}
+
+# Match by name suffix (fallback for log bucket pattern)
+pab_for(bucket_addr) := pab if {
+	some r in input.configuration.root_module.resources
+	r.type == "aws_s3_bucket_public_access_block"
+	bucket_name := trim_prefix(bucket_addr, "aws_s3_bucket.")
+	r.name == bucket_name
 	pab := {"address": sprintf("aws_s3_bucket_public_access_block.%s", [r.name])}
 }
 
@@ -48,4 +58,9 @@ pab_planned_values(addr) := values if {
 	some r in input.planned_values.root_module.resources
 	r.address == addr
 	values := r.values
+}
+
+trim_prefix(s, prefix) := result if {
+	startswith(s, prefix)
+	result := substring(s, count(prefix), -1)
 }
